@@ -680,8 +680,8 @@ var _react = require("react");
 var _reactDefault = parcelHelpers.interopDefault(_react);
 var _client = require("react-dom/client");
 var _clientDefault = parcelHelpers.interopDefault(_client);
-var _timeline = require("./Timeline"); // <— novo
-var _timelineDefault = parcelHelpers.interopDefault(_timeline);
+var _timelineJsx = require("./Timeline.jsx");
+var _timelineJsxDefault = parcelHelpers.interopDefault(_timelineJsx);
 var _timelineItems = require("./timelineItems");
 var _timelineItemsDefault = parcelHelpers.interopDefault(_timelineItems);
 var _appCss = require("./app.css");
@@ -689,7 +689,6 @@ var _s = $RefreshSig$();
 function App() {
     _s();
     const [data, setData] = (0, _react.useState)((0, _timelineItemsDefault.default));
-    // calcula início/fim do viewport a partir dos dados
     const viewportStart = data.reduce((min, i)=>i.start < min ? i.start : min, data[0].start);
     const viewportEnd = data.reduce((max, i)=>i.end > max ? i.end : max, data[0].end);
     const updateItem = (u)=>setData((prev)=>prev.map((x)=>x.id === u.id ? u : x));
@@ -719,7 +718,7 @@ function App() {
                 lineNumber: 19,
                 columnNumber: 7
             }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _timelineDefault.default), {
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)((0, _timelineJsxDefault.default), {
                 items: data,
                 viewportStart: viewportStart,
                 viewportEnd: viewportEnd,
@@ -752,7 +751,7 @@ $RefreshReg$(_c, "App");
   globalThis.$RefreshReg$ = prevRefreshReg;
   globalThis.$RefreshSig$ = prevRefreshSig;
 }
-},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","react-dom/client":"hrvwu","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi","./Timeline":"7wZpe","./timelineItems":"FMnwD","./app.css":"j7YWT"}],"dVPUn":[function(require,module,exports,__globalThis) {
+},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","react-dom/client":"hrvwu","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi","./timelineItems":"FMnwD","./app.css":"j7YWT","./Timeline.jsx":"amzbF"}],"dVPUn":[function(require,module,exports,__globalThis) {
 'use strict';
 module.exports = require("ee51401569654d91");
 
@@ -27303,347 +27302,6 @@ function $da9882e673ac146b$var$ErrorOverlay() {
     return null;
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"7wZpe":[function(require,module,exports,__globalThis) {
-var $parcel$ReactRefreshHelpers$7586 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
-$parcel$ReactRefreshHelpers$7586.init();
-var prevRefreshReg = globalThis.$RefreshReg$;
-var prevRefreshSig = globalThis.$RefreshSig$;
-$parcel$ReactRefreshHelpers$7586.prelude(module);
-
-try {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "default", ()=>Timeline);
-var _jsxDevRuntime = require("react/jsx-dev-runtime");
-var _react = require("react");
-var _reactDefault = parcelHelpers.interopDefault(_react);
-var _assignLanes = require("./assignLanes");
-var _assignLanesDefault = parcelHelpers.interopDefault(_assignLanes);
-var _timelineItems = require("./timelineItems");
-var _timelineItemsDefault = parcelHelpers.interopDefault(_timelineItems);
-var _s = $RefreshSig$();
-const MS = 86400000;
-const PX_PER_DAY = 70;
-const GUTTER = 180;
-function toLaneArrays(result) {
-    if (!Array.isArray(result) || result.length === 0) return [];
-    if (Array.isArray(result[0])) return result;
-    const byLane = new Map();
-    for (const it of result){
-        const idx = (it.lane ?? it._lane ?? 0) | 0;
-        if (!byLane.has(idx)) byLane.set(idx, []);
-        byLane.get(idx).push(it);
-    }
-    return Array.from(byLane.keys()).sort((a, b)=>a - b).map((k)=>byLane.get(k));
-}
-function parseYmd(s) {
-    const [y, m, d] = s.split("-").map(Number);
-    return new Date(y, m - 1, d);
-}
-function formatYMD(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${dd}`;
-}
-function Timeline() {
-    _s();
-    const lanes = (0, _react.useMemo)(()=>{
-        try {
-            const res = (0, _assignLanesDefault.default)((0, _timelineItemsDefault.default));
-            return toLaneArrays(res);
-        } catch  {
-            return [];
-        }
-    }, []);
-    const [minDate, maxDate] = (0, _react.useMemo)(()=>{
-        const all = (0, _timelineItemsDefault.default).flatMap(({ start, end })=>[
-                parseYmd(start),
-                parseYmd(end)
-            ]);
-        const min = new Date(Math.min(...all.map((d)=>+d)));
-        const max = new Date(Math.max(...all.map((d)=>+d)));
-        return [
-            min,
-            max
-        ];
-    }, []);
-    const totalDays = Math.floor((maxDate - minDate) / MS) + 1;
-    const leftFor = (dateStr)=>{
-        const days = Math.floor((parseYmd(dateStr) - minDate) / MS);
-        return GUTTER + days * PX_PER_DAY;
-    };
-    const widthFor = (startStr, endStr)=>{
-        const days = Math.floor((parseYmd(endStr) - parseYmd(startStr)) / MS) + 1;
-        return Math.max(1, days * PX_PER_DAY);
-    };
-    const scrollerRef = (0, _react.useRef)(null);
-    const [scrollLeft, setScrollLeft] = (0, _react.useState)(0);
-    (0, _react.useEffect)(()=>{
-        const el = scrollerRef.current;
-        if (!el) return;
-        const onScroll = ()=>setScrollLeft(el.scrollLeft);
-        onScroll();
-        el.addEventListener("scroll", onScroll, {
-            passive: true
-        });
-        return ()=>el.removeEventListener("scroll", onScroll);
-    }, []);
-    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-        className: "tl-root",
-        children: [
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                className: "tl-header",
-                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                    className: "tl-ticksRow",
-                    "aria-hidden": true,
-                    children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                        className: "tl-headerWrap",
-                        style: {
-                            width: GUTTER + totalDays * PX_PER_DAY
-                        },
-                        children: [
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                className: "tl-gutterDivider"
-                            }, void 0, false, {
-                                fileName: "src/Timeline.js",
-                                lineNumber: 79,
-                                columnNumber: 13
-                            }, this),
-                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                className: "tl-ticksTrack",
-                                style: {
-                                    width: totalDays * PX_PER_DAY,
-                                    transform: `translateX(${-scrollLeft}px)`
-                                },
-                                children: Array.from({
-                                    length: totalDays
-                                }, (_, i)=>{
-                                    const d = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate() + i);
-                                    const label = formatYMD(d);
-                                    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                        className: "tl-tick",
-                                        style: {
-                                            left: i * PX_PER_DAY
-                                        },
-                                        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                            className: "tl-tickLabel",
-                                            children: label
-                                        }, void 0, false, {
-                                            fileName: "src/Timeline.js",
-                                            lineNumber: 92,
-                                            columnNumber: 21
-                                        }, this)
-                                    }, i, false, {
-                                        fileName: "src/Timeline.js",
-                                        lineNumber: 91,
-                                        columnNumber: 19
-                                    }, this);
-                                })
-                            }, void 0, false, {
-                                fileName: "src/Timeline.js",
-                                lineNumber: 80,
-                                columnNumber: 13
-                            }, this)
-                        ]
-                    }, void 0, true, {
-                        fileName: "src/Timeline.js",
-                        lineNumber: 78,
-                        columnNumber: 11
-                    }, this)
-                }, void 0, false, {
-                    fileName: "src/Timeline.js",
-                    lineNumber: 77,
-                    columnNumber: 9
-                }, this)
-            }, void 0, false, {
-                fileName: "src/Timeline.js",
-                lineNumber: 76,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                ref: scrollerRef,
-                className: "tl-scroller",
-                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                    className: "tl-canvas",
-                    style: {
-                        width: GUTTER + totalDays * PX_PER_DAY
-                    },
-                    children: [
-                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                            className: "tl-bodyMask"
-                        }, void 0, false, {
-                            fileName: "src/Timeline.js",
-                            lineNumber: 103,
-                            columnNumber: 11
-                        }, this),
-                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                            className: "tl-today",
-                            style: {
-                                left: GUTTER + Math.floor((Date.now() - minDate) / MS) * PX_PER_DAY
-                            },
-                            "aria-label": "Today"
-                        }, void 0, false, {
-                            fileName: "src/Timeline.js",
-                            lineNumber: 105,
-                            columnNumber: 11
-                        }, this),
-                        lanes.map((lane, laneIndex)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                className: "tl-lane",
-                                style: {
-                                    height: 50
-                                },
-                                role: "list",
-                                children: [
-                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                        className: "tl-laneHeader",
-                                        children: [
-                                            "Lane ",
-                                            laneIndex + 1
-                                        ]
-                                    }, void 0, true, {
-                                        fileName: "src/Timeline.js",
-                                        lineNumber: 113,
-                                        columnNumber: 15
-                                    }, this),
-                                    lane.map((item)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                            className: "tl-item",
-                                            role: "listitem",
-                                            title: `${item.name}\n${item.start} \u{2013} ${item.end}`,
-                                            style: {
-                                                left: leftFor(item.start),
-                                                width: widthFor(item.start, item.end),
-                                                top: 8
-                                            },
-                                            children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
-                                                className: "tl-label",
-                                                children: item.name
-                                            }, void 0, false, {
-                                                fileName: "src/Timeline.js",
-                                                lineNumber: 127,
-                                                columnNumber: 19
-                                            }, this)
-                                        }, item.id, false, {
-                                            fileName: "src/Timeline.js",
-                                            lineNumber: 116,
-                                            columnNumber: 17
-                                        }, this)),
-                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                        className: "tl-rowGuide",
-                                        style: {
-                                            top: 24
-                                        }
-                                    }, void 0, false, {
-                                        fileName: "src/Timeline.js",
-                                        lineNumber: 131,
-                                        columnNumber: 15
-                                    }, this)
-                                ]
-                            }, laneIndex, true, {
-                                fileName: "src/Timeline.js",
-                                lineNumber: 112,
-                                columnNumber: 13
-                            }, this))
-                    ]
-                }, void 0, true, {
-                    fileName: "src/Timeline.js",
-                    lineNumber: 102,
-                    columnNumber: 9
-                }, this)
-            }, void 0, false, {
-                fileName: "src/Timeline.js",
-                lineNumber: 101,
-                columnNumber: 7
-            }, this),
-            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                style: {
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 12,
-                    padding: "8px 0"
-                },
-                "aria-hidden": true,
-                children: [
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
-                        children: "Timeline"
-                    }, void 0, false, {
-                        fileName: "src/Timeline.js",
-                        lineNumber: 138,
-                        columnNumber: 9
-                    }, this),
-                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
-                        className: "tl-helper",
-                        children: "Gutter fixo, ticks YYYY-MM-DD, layout compacto"
-                    }, void 0, false, {
-                        fileName: "src/Timeline.js",
-                        lineNumber: 139,
-                        columnNumber: 9
-                    }, this)
-                ]
-            }, void 0, true, {
-                fileName: "src/Timeline.js",
-                lineNumber: 137,
-                columnNumber: 7
-            }, this)
-        ]
-    }, void 0, true, {
-        fileName: "src/Timeline.js",
-        lineNumber: 75,
-        columnNumber: 5
-    }, this);
-}
-_s(Timeline, "jA4QnWv5zq9od6DYbtTdhlAnl8g=");
-_c = Timeline;
-var _c;
-$RefreshReg$(_c, "Timeline");
-
-  $parcel$ReactRefreshHelpers$7586.postlude(module);
-} finally {
-  globalThis.$RefreshReg$ = prevRefreshReg;
-  globalThis.$RefreshSig$ = prevRefreshSig;
-}
-},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","./assignLanes":"d7Zep","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi","./timelineItems":"FMnwD"}],"d7Zep":[function(require,module,exports,__globalThis) {
-/**
- * Assigns a compact lane index to each item.
- * - items: [{ id, name, start:"YYYY-MM-DD", end:"YYYY-MM-DD" }]
- * - options:
- *    - gapDays: min spacing between items in the same lane (default 0)
- *    - minSpanDays: min duration to help fit labels (default 0)
- * @returns array of items augmented with { lane }.
- */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "default", ()=>assignLanes);
-function assignLanes(items, { gapDays = 0, minSpanDays = 0 } = {}) {
-    const MS = 86400000;
-    const toMs = (s)=>{
-        const d = new Date(s);
-        d.setHours(0, 0, 0, 0);
-        return d.getTime();
-    };
-    const byStart = items.map((it, idx)=>({
-            ...it,
-            __i: idx
-        })).sort((a, b)=>toMs(a.start) - toMs(b.start) || toMs(a.end) - toMs(b.end));
-    const lanesEnd = [];
-    const out = [];
-    const gapMs = gapDays * MS;
-    for (const it of byStart){
-        const s = toMs(it.start);
-        let e = toMs(it.end);
-        const minEnd = s + minSpanDays * MS;
-        if (e < minEnd) e = minEnd;
-        let lane = 0;
-        while(lane < lanesEnd.length && s < lanesEnd[lane] + gapMs)lane++;
-        if (lane === lanesEnd.length) lanesEnd.push(0);
-        lanesEnd[lane] = e;
-        out.push({
-            ...it,
-            lane
-        });
-    }
-    return out.map(({ __i, ...rest })=>rest);
-}
-
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"FMnwD":[function(require,module,exports,__globalThis) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
@@ -27747,6 +27405,448 @@ const timelineItems = [
 ];
 exports.default = timelineItems;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"j7YWT":[function() {},{}]},["5j6Kf","a0t4e"], "a0t4e", "parcelRequire9642", {}, null, null, "http://localhost:1234")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}],"j7YWT":[function() {},{}],"amzbF":[function(require,module,exports,__globalThis) {
+var $parcel$ReactRefreshHelpers$2af9 = require("@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js");
+$parcel$ReactRefreshHelpers$2af9.init();
+var prevRefreshReg = globalThis.$RefreshReg$;
+var prevRefreshSig = globalThis.$RefreshSig$;
+$parcel$ReactRefreshHelpers$2af9.prelude(module);
+
+try {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>Timeline);
+var _jsxDevRuntime = require("react/jsx-dev-runtime");
+var _react = require("react");
+var _reactDefault = parcelHelpers.interopDefault(_react);
+var _assignLanes = require("./assignLanes");
+var _assignLanesDefault = parcelHelpers.interopDefault(_assignLanes);
+var _s = $RefreshSig$();
+const MS = 86400000;
+const PX_PER_DAY = 70;
+const GUTTER = 180;
+function toLaneArrays(result) {
+    if (!Array.isArray(result) || result.length === 0) return [];
+    if (Array.isArray(result[0])) return result;
+    const byLane = new Map();
+    for (const it of result){
+        const idx = (it.lane ?? it._lane ?? 0) | 0;
+        if (!byLane.has(idx)) byLane.set(idx, []);
+        byLane.get(idx).push(it);
+    }
+    return Array.from(byLane.keys()).sort((a, b)=>a - b).map((k)=>byLane.get(k));
+}
+function parseYmd(s) {
+    const [y, m, d] = s.split("-").map(Number);
+    return new Date(y, m - 1, d);
+}
+function toYmd(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${dd}`;
+}
+function formatYMD(d) {
+    return toYmd(d);
+}
+function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
+    _s();
+    const lanes = (0, _react.useMemo)(()=>{
+        try {
+            const res = (0, _assignLanesDefault.default)(items);
+            return toLaneArrays(res);
+        } catch  {
+            return [];
+        }
+    }, [
+        items
+    ]);
+    const [minDate, maxDate] = (0, _react.useMemo)(()=>{
+        if (viewportStart && viewportEnd) return [
+            parseYmd(viewportStart),
+            parseYmd(viewportEnd)
+        ];
+        const all = items.flatMap(({ start, end })=>[
+                parseYmd(start),
+                parseYmd(end)
+            ]);
+        const min = new Date(Math.min(...all.map((d)=>+d)));
+        const max = new Date(Math.max(...all.map((d)=>+d)));
+        return [
+            min,
+            max
+        ];
+    }, [
+        items,
+        viewportStart,
+        viewportEnd
+    ]);
+    const totalDays = Math.floor((maxDate - minDate) / MS) + 1;
+    const leftFor = (dateStr)=>{
+        const days = Math.floor((parseYmd(dateStr) - minDate) / MS);
+        return GUTTER + days * PX_PER_DAY;
+    };
+    const widthFor = (startStr, endStr)=>{
+        const days = Math.floor((parseYmd(endStr) - parseYmd(startStr)) / MS) + 1;
+        return Math.max(1, days * PX_PER_DAY);
+    };
+    const scrollerRef = (0, _react.useRef)(null);
+    const [scrollLeft, setScrollLeft] = (0, _react.useState)(0);
+    (0, _react.useEffect)(()=>{
+        const el = scrollerRef.current;
+        if (!el) return;
+        const onScroll = ()=>setScrollLeft(el.scrollLeft);
+        onScroll();
+        el.addEventListener("scroll", onScroll, {
+            passive: true
+        });
+        return ()=>el.removeEventListener("scroll", onScroll);
+    }, []);
+    const dragRef = (0, _react.useRef)(null);
+    const startDrag = (e, item, kind)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        dragRef.current = {
+            kind,
+            id: item.id,
+            startX: e.clientX,
+            origStart: parseYmd(item.start),
+            origEnd: parseYmd(item.end),
+            lastDeltaDays: null
+        };
+        document.body.style.userSelect = "none";
+        window.addEventListener("mousemove", onDrag);
+        window.addEventListener("mouseup", endDrag, {
+            once: true
+        });
+    };
+    const onDrag = (e)=>{
+        const st = dragRef.current;
+        if (!st) return;
+        const dx = e.clientX - st.startX;
+        const deltaDays = Math.round(dx / PX_PER_DAY);
+        if (deltaDays === st.lastDeltaDays) return;
+        st.lastDeltaDays = deltaDays;
+        const update = (orig)=>{
+            if (st.kind === "start") {
+                const nextStart = new Date(st.origStart.getTime() + deltaDays * MS);
+                const safeStart = nextStart <= st.origEnd ? nextStart : st.origEnd;
+                return {
+                    ...orig,
+                    start: toYmd(safeStart)
+                };
+            }
+            if (st.kind === "end") {
+                const nextEnd = new Date(st.origEnd.getTime() + deltaDays * MS);
+                const safeEnd = nextEnd >= st.origStart ? nextEnd : st.origStart;
+                return {
+                    ...orig,
+                    end: toYmd(safeEnd)
+                };
+            }
+            const nextStart = new Date(st.origStart.getTime() + deltaDays * MS);
+            const nextEnd = new Date(st.origEnd.getTime() + deltaDays * MS);
+            return {
+                ...orig,
+                start: toYmd(nextStart),
+                end: toYmd(nextEnd)
+            };
+        };
+        const current = items.find((i)=>i.id === st.id);
+        if (!current) return;
+        onChangeItem?.(update(current));
+    };
+    const endDrag = ()=>{
+        dragRef.current = null;
+        document.body.style.userSelect = "";
+        window.removeEventListener("mousemove", onDrag);
+    };
+    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+        className: "tl-root",
+        children: [
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                className: "tl-header",
+                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                    className: "tl-ticksRow",
+                    "aria-hidden": true,
+                    children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                        className: "tl-headerWrap",
+                        style: {
+                            width: GUTTER + totalDays * PX_PER_DAY
+                        },
+                        children: [
+                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                className: "tl-gutterDivider"
+                            }, void 0, false, {
+                                fileName: "src/Timeline.jsx",
+                                lineNumber: 141,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                className: "tl-ticksTrack",
+                                style: {
+                                    width: totalDays * PX_PER_DAY,
+                                    transform: `translateX(-${scrollLeft}px)`
+                                },
+                                children: Array.from({
+                                    length: totalDays
+                                }, (_, i)=>{
+                                    const d = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate() + i);
+                                    const label = formatYMD(d);
+                                    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                        className: "tl-tick",
+                                        style: {
+                                            left: i * PX_PER_DAY
+                                        },
+                                        children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                            className: "tl-tickLabel",
+                                            children: label
+                                        }, void 0, false, {
+                                            fileName: "src/Timeline.jsx",
+                                            lineNumber: 151,
+                                            columnNumber: 21
+                                        }, this)
+                                    }, i, false, {
+                                        fileName: "src/Timeline.jsx",
+                                        lineNumber: 150,
+                                        columnNumber: 19
+                                    }, this);
+                                })
+                            }, void 0, false, {
+                                fileName: "src/Timeline.jsx",
+                                lineNumber: 142,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "src/Timeline.jsx",
+                        lineNumber: 140,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "src/Timeline.jsx",
+                    lineNumber: 139,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "src/Timeline.jsx",
+                lineNumber: 138,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                ref: scrollerRef,
+                className: "tl-scroller",
+                children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                    className: "tl-canvas",
+                    style: {
+                        width: GUTTER + totalDays * PX_PER_DAY
+                    },
+                    children: [
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                            className: "tl-bodyMask"
+                        }, void 0, false, {
+                            fileName: "src/Timeline.jsx",
+                            lineNumber: 162,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                            className: "tl-today",
+                            style: {
+                                left: GUTTER + Math.floor((Date.now() - minDate) / MS) * PX_PER_DAY
+                            },
+                            "aria-label": "Today"
+                        }, void 0, false, {
+                            fileName: "src/Timeline.jsx",
+                            lineNumber: 163,
+                            columnNumber: 11
+                        }, this),
+                        lanes.map((lane, laneIndex)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                className: "tl-lane",
+                                style: {
+                                    height: 50
+                                },
+                                role: "list",
+                                children: [
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                        className: "tl-laneHeader",
+                                        children: [
+                                            "Lane ",
+                                            laneIndex + 1
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "src/Timeline.jsx",
+                                        lineNumber: 170,
+                                        columnNumber: 15
+                                    }, this),
+                                    lane.map((item)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                            className: "tl-item",
+                                            role: "listitem",
+                                            title: `${item.name}\n${item.start} \u{2013} ${item.end}`,
+                                            onMouseDown: (e)=>{
+                                                const roleEl = e.target.closest("[data-role]");
+                                                const role = roleEl ? roleEl.getAttribute("data-role") : "move";
+                                                startDrag(e, item, role);
+                                            },
+                                            style: {
+                                                left: leftFor(item.start),
+                                                width: widthFor(item.start, item.end),
+                                                top: 8
+                                            },
+                                            children: [
+                                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                                    className: "tl-handle tl-handle-start",
+                                                    "data-role": "start"
+                                                }, void 0, false, {
+                                                    fileName: "src/Timeline.jsx",
+                                                    lineNumber: 189,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                                    className: "tl-moveGrip",
+                                                    "data-role": "move",
+                                                    children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
+                                                        className: "tl-label",
+                                                        children: item.name
+                                                    }, void 0, false, {
+                                                        fileName: "src/Timeline.jsx",
+                                                        lineNumber: 191,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "src/Timeline.jsx",
+                                                    lineNumber: 190,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                                    className: "tl-handle tl-handle-end",
+                                                    "data-role": "end"
+                                                }, void 0, false, {
+                                                    fileName: "src/Timeline.jsx",
+                                                    lineNumber: 193,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, item.id, true, {
+                                            fileName: "src/Timeline.jsx",
+                                            lineNumber: 173,
+                                            columnNumber: 17
+                                        }, this)),
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                                        className: "tl-rowGuide",
+                                        style: {
+                                            top: 24
+                                        }
+                                    }, void 0, false, {
+                                        fileName: "src/Timeline.jsx",
+                                        lineNumber: 197,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, laneIndex, true, {
+                                fileName: "src/Timeline.jsx",
+                                lineNumber: 169,
+                                columnNumber: 13
+                            }, this))
+                    ]
+                }, void 0, true, {
+                    fileName: "src/Timeline.jsx",
+                    lineNumber: 161,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "src/Timeline.jsx",
+                lineNumber: 160,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                style: {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    padding: "8px 0"
+                },
+                "aria-hidden": true,
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("strong", {
+                        children: "Timeline"
+                    }, void 0, false, {
+                        fileName: "src/Timeline.jsx",
+                        lineNumber: 204,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
+                        className: "tl-helper",
+                        children: "Drag nas bordas altera in\xedcio/fim \u2022 Drag no centro move"
+                    }, void 0, false, {
+                        fileName: "src/Timeline.jsx",
+                        lineNumber: 205,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/Timeline.jsx",
+                lineNumber: 203,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "src/Timeline.jsx",
+        lineNumber: 137,
+        columnNumber: 5
+    }, this);
+}
+_s(Timeline, "41ovCqwP/Coy26QNSAyfY/Xhe5M=");
+_c = Timeline;
+var _c;
+$RefreshReg$(_c, "Timeline");
+
+  $parcel$ReactRefreshHelpers$2af9.postlude(module);
+} finally {
+  globalThis.$RefreshReg$ = prevRefreshReg;
+  globalThis.$RefreshSig$ = prevRefreshSig;
+}
+},{"react/jsx-dev-runtime":"dVPUn","react":"jMk1U","./assignLanes":"d7Zep","@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT","@parcel/transformer-react-refresh-wrap/lib/helpers/helpers.js":"7h6Pi"}],"d7Zep":[function(require,module,exports,__globalThis) {
+/**
+ * Assigns a compact lane index to each item.
+ * - items: [{ id, name, start:"YYYY-MM-DD", end:"YYYY-MM-DD" }]
+ * - options:
+ *    - gapDays: min spacing between items in the same lane (default 0)
+ *    - minSpanDays: min duration to help fit labels (default 0)
+ * @returns array of items augmented with { lane }.
+ */ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "default", ()=>assignLanes);
+function assignLanes(items, { gapDays = 0, minSpanDays = 0 } = {}) {
+    const MS = 86400000;
+    const toMs = (s)=>{
+        const d = new Date(s);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime();
+    };
+    const byStart = items.map((it, idx)=>({
+            ...it,
+            __i: idx
+        })).sort((a, b)=>toMs(a.start) - toMs(b.start) || toMs(a.end) - toMs(b.end));
+    const lanesEnd = [];
+    const out = [];
+    const gapMs = gapDays * MS;
+    for (const it of byStart){
+        const s = toMs(it.start);
+        let e = toMs(it.end);
+        const minEnd = s + minSpanDays * MS;
+        if (e < minEnd) e = minEnd;
+        let lane = 0;
+        while(lane < lanesEnd.length && s < lanesEnd[lane] + gapMs)lane++;
+        if (lane === lanesEnd.length) lanesEnd.push(0);
+        lanesEnd[lane] = e;
+        out.push({
+            ...it,
+            lane
+        });
+    }
+    return out.map(({ __i, ...rest })=>rest);
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}]},["5j6Kf","a0t4e"], "a0t4e", "parcelRequire9642", {}, null, null, "http://localhost:1234")
 
 //# sourceMappingURL=timeline.31b563d9.js.map

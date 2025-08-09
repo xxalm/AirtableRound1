@@ -163,4 +163,15 @@
   bottom: 0;
   left: 0;
 }
+
+.tl-moveGrip {
+  cursor: grab;
+  flex: 1;
+  align-items: center;
+  display: flex;
+}
+
+.tl-moveGrip:active {
+  cursor: grabbing;
+}
 /*# sourceMappingURL=timeline.4a5519d3.css.map */

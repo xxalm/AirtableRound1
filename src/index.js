@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
-import Timeline from "./Timeline";        // <— novo
+import Timeline from "./Timeline.jsx";
 import timelineItems from "./timelineItems";
 import "./app.css";
 
 function App() {
   const [data, setData] = useState(timelineItems);
 
-  // calcula início/fim do viewport a partir dos dados
+
   const viewportStart = data.reduce((min, i) => (i.start < min ? i.start : min), data[0].start);
   const viewportEnd   = data.reduce((max, i) => (i.end   > max ? i.end   : max), data[0].end);
 

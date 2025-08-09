@@ -155,3 +155,11 @@
   pointer-events: none;
   z-index: 4;
 }
+
+.tl-moveGrip {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  cursor: grab;
+}
+.tl-moveGrip:active { cursor: grabbing; }
