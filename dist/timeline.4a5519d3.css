@@ -1,0 +1,170 @@
+:root {
+  --tl-gutter: 180px;
+  --tl-border: #e5e7eb;
+  --tl-border-soft: #f3f4f6;
+  --tl-text-muted: #6b7280;
+  --tl-item: #eef2ff;
+  --tl-item-border: #d1d5db;
+  --tl-item-border-selected: #6366f1;
+  --tl-today: #ef4444;
+  --tl-font: Inter, system-ui, sans-serif;
+  --tl-ticks-height: 45px;
+}
+
+.tl-root {
+  font: 12px var(--tl-font);
+  color: #111;
+  flex-direction: column;
+  display: flex;
+}
+
+.tl-header {
+  z-index: 2;
+  border-bottom: 1px solid var(--tl-border);
+  backdrop-filter: blur(4px);
+  background: #ffffffe6;
+  position: sticky;
+  top: 0;
+}
+
+.tl-ticksRow {
+  height: var(--tl-ticks-height);
+  position: relative;
+}
+
+.tl-scroller {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+}
+
+.tl-canvas {
+  position: relative;
+}
+
+.tl-today {
+  background: var(--tl-today);
+  width: 1px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.tl-lane {
+  border-bottom: 1px solid var(--tl-border-soft);
+  position: relative;
+}
+
+.tl-laneHeader {
+  z-index: 5;
+  box-sizing: border-box;
+  width: var(--tl-gutter);
+  border-right: 1px solid var(--tl-border);
+  color: #374151;
+  background: #ffffffd9;
+  padding: 6px 8px;
+  font-size: 11px;
+  position: sticky;
+  left: 0;
+}
+
+.tl-item {
+  z-index: 1;
+  background: var(--tl-item);
+  border: 1px solid var(--tl-item-border);
+  border-radius: 6px;
+  outline: none;
+  align-items: center;
+  height: 24px;
+  display: flex;
+  position: absolute;
+}
+
+.tl-item--selected {
+  border-color: var(--tl-item-border-selected);
+  box-shadow: 0 1px 6px #00000014;
+}
+
+.tl-label {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: left;
+  padding: 0 8px;
+  overflow: hidden;
+}
+
+.tl-handle {
+  cursor: ew-resize;
+  background: none;
+  align-self: stretch;
+  width: 8px;
+}
+
+.tl-rowGuide {
+  left: var(--tl-gutter);
+  border-top: 1px dashed var(--tl-border-soft);
+  position: absolute;
+  right: 0;
+}
+
+.tl-helper {
+  color: var(--tl-text-muted);
+  margin-left: 8px;
+}
+
+.tl-headerWrap {
+  position: absolute;
+  inset: 0;
+}
+
+.tl-gutterDivider {
+  width: var(--tl-gutter);
+  border-right: 1px solid var(--tl-border);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.tl-ticksTrack {
+  top: 0;
+  bottom: 0;
+  left: var(--tl-gutter);
+  position: absolute;
+  right: 0;
+}
+
+.tl-tick {
+  border-left: 1px solid var(--tl-border);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+
+.tl-tickLabel {
+  color: var(--tl-text-muted);
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.1;
+  position: absolute;
+  top: 6px;
+  left: 4px;
+}
+
+.tl-tickMon {
+  color: var(--tl-text-muted);
+  font-size: 10px;
+}
+
+.tl-bodyMask {
+  width: var(--tl-gutter);
+  border-right: 1px solid var(--tl-border);
+  pointer-events: none;
+  z-index: 4;
+  background: #fff;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+/*# sourceMappingURL=timeline.4a5519d3.css.map */
