@@ -27423,7 +27423,6 @@ var _assignLanes = require("./assignLanes");
 var _assignLanesDefault = parcelHelpers.interopDefault(_assignLanes);
 var _s = $RefreshSig$();
 const MS = 86400000;
-const PX_PER_DAY = 70;
 const GUTTER = 180;
 function toLaneArrays(result) {
     if (!Array.isArray(result) || result.length === 0) return [];
@@ -27482,13 +27481,14 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
         viewportEnd
     ]);
     const totalDays = Math.floor((maxDate - minDate) / MS) + 1;
+    const [pxPerDay, setPxPerDay] = (0, _react.useState)(70);
     const leftFor = (dateStr)=>{
         const days = Math.floor((parseYmd(dateStr) - minDate) / MS);
-        return GUTTER + days * PX_PER_DAY;
+        return GUTTER + days * pxPerDay;
     };
     const widthFor = (startStr, endStr)=>{
         const days = Math.floor((parseYmd(endStr) - parseYmd(startStr)) / MS) + 1;
-        return Math.max(1, days * PX_PER_DAY);
+        return Math.max(1, days * pxPerDay);
     };
     const scrollerRef = (0, _react.useRef)(null);
     const [scrollLeft, setScrollLeft] = (0, _react.useState)(0);
@@ -27502,6 +27502,25 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
         });
         return ()=>el.removeEventListener("scroll", onScroll);
     }, []);
+    const onWheel = (e)=>{
+        const el = scrollerRef.current;
+        if (!el) return;
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            const rect = el.getBoundingClientRect();
+            const cursorX = el.scrollLeft + (e.clientX - rect.left);
+            const xFromScale = Math.max(0, cursorX - GUTTER);
+            const daysAtCursor = xFromScale / pxPerDay;
+            const factor = e.deltaY < 0 ? 1.1 : 0.9;
+            const next = Math.max(4, Math.min(400, pxPerDay * factor));
+            setPxPerDay(next);
+            const newCursorX = GUTTER + daysAtCursor * next;
+            const newScroll = newCursorX - (e.clientX - rect.left);
+            requestAnimationFrame(()=>{
+                el.scrollLeft = Math.max(0, newScroll);
+            });
+        }
+    };
     const dragRef = (0, _react.useRef)(null);
     const [editingId, setEditingId] = (0, _react.useState)(null);
     const [draftName, setDraftName] = (0, _react.useState)("");
@@ -27556,7 +27575,7 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
             if (st.el && st.el.setPointerCapture) st.el.setPointerCapture(e.pointerId);
             document.body.style.userSelect = "none";
         }
-        const deltaDays = Math.round(dx / PX_PER_DAY);
+        const deltaDays = Math.round(dx / pxPerDay);
         if (deltaDays === st.lastDeltaDays) return;
         st.lastDeltaDays = deltaDays;
         const update = (orig)=>{
@@ -27609,6 +27628,19 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
         setEditingId(null);
     };
     const cancelEdit = ()=>setEditingId(null);
+    const minLabelPx = 80;
+    const steps = [
+        1,
+        2,
+        3,
+        5,
+        7,
+        10,
+        14,
+        21,
+        30
+    ];
+    const dayStep = steps.find((s)=>s * pxPerDay >= minLabelPx) ?? steps[steps.length - 1];
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
         className: "tl-root",
         children: [
@@ -27620,92 +27652,94 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                     children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                         className: "tl-headerWrap",
                         style: {
-                            width: GUTTER + totalDays * PX_PER_DAY
+                            width: GUTTER + totalDays * pxPerDay
                         },
                         children: [
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                 className: "tl-gutterDivider"
                             }, void 0, false, {
                                 fileName: "src/Timeline.jsx",
-                                lineNumber: 188,
+                                lineNumber: 212,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                 className: "tl-ticksTrack",
                                 style: {
-                                    width: totalDays * PX_PER_DAY,
+                                    width: totalDays * pxPerDay,
                                     transform: `translateX(-${scrollLeft}px)`
                                 },
                                 children: Array.from({
-                                    length: totalDays
-                                }, (_, i)=>{
+                                    length: Math.ceil(totalDays / dayStep)
+                                }, (_, k)=>{
+                                    const i = k * dayStep;
                                     const d = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate() + i);
                                     const label = formatYMD(d);
                                     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                         className: "tl-tick",
                                         style: {
-                                            left: i * PX_PER_DAY
+                                            left: i * pxPerDay
                                         },
                                         children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                             className: "tl-tickLabel",
                                             children: label
                                         }, void 0, false, {
                                             fileName: "src/Timeline.jsx",
-                                            lineNumber: 198,
+                                            lineNumber: 223,
                                             columnNumber: 21
                                         }, this)
                                     }, i, false, {
                                         fileName: "src/Timeline.jsx",
-                                        lineNumber: 197,
+                                        lineNumber: 222,
                                         columnNumber: 19
                                     }, this);
                                 })
                             }, void 0, false, {
                                 fileName: "src/Timeline.jsx",
-                                lineNumber: 189,
+                                lineNumber: 213,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/Timeline.jsx",
-                        lineNumber: 187,
+                        lineNumber: 211,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "src/Timeline.jsx",
-                    lineNumber: 186,
+                    lineNumber: 210,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/Timeline.jsx",
-                lineNumber: 185,
+                lineNumber: 209,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                 ref: scrollerRef,
                 className: "tl-scroller",
+                onWheel: onWheel,
                 children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                     className: "tl-canvas",
                     style: {
-                        width: GUTTER + totalDays * PX_PER_DAY
+                        width: GUTTER + totalDays * pxPerDay
                     },
                     children: [
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                             className: "tl-bodyMask"
                         }, void 0, false, {
                             fileName: "src/Timeline.jsx",
-                            lineNumber: 209,
+                            lineNumber: 234,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                             className: "tl-today",
                             style: {
-                                left: GUTTER + Math.floor((Date.now() - minDate) / MS) * PX_PER_DAY
+                                left: GUTTER + Math.floor((Date.now() - minDate) / MS) * pxPerDay
                             },
                             "aria-label": "Today"
                         }, void 0, false, {
                             fileName: "src/Timeline.jsx",
-                            lineNumber: 210,
+                            lineNumber: 235,
                             columnNumber: 11
                         }, this),
                         lanes.map((lane, laneIndex)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27723,7 +27757,7 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "src/Timeline.jsx",
-                                        lineNumber: 217,
+                                        lineNumber: 242,
                                         columnNumber: 15
                                     }, this),
                                     lane.map((item)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27742,7 +27776,7 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                                     onPointerDown: (e)=>beginImmediate(e, item, "start")
                                                 }, void 0, false, {
                                                     fileName: "src/Timeline.jsx",
-                                                    lineNumber: 230,
+                                                    lineNumber: 255,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27769,19 +27803,19 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                                         }
                                                     }, void 0, false, {
                                                         fileName: "src/Timeline.jsx",
-                                                        lineNumber: 242,
+                                                        lineNumber: 267,
                                                         columnNumber: 23
                                                     }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
                                                         className: "tl-label",
                                                         children: item.name
                                                     }, void 0, false, {
                                                         fileName: "src/Timeline.jsx",
-                                                        lineNumber: 261,
+                                                        lineNumber: 286,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "src/Timeline.jsx",
-                                                    lineNumber: 235,
+                                                    lineNumber: 260,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27790,13 +27824,13 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                                     onPointerDown: (e)=>beginImmediate(e, item, "end")
                                                 }, void 0, false, {
                                                     fileName: "src/Timeline.jsx",
-                                                    lineNumber: 264,
+                                                    lineNumber: 289,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, item.id, true, {
                                             fileName: "src/Timeline.jsx",
-                                            lineNumber: 219,
+                                            lineNumber: 244,
                                             columnNumber: 17
                                         }, this)),
                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27806,24 +27840,24 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                         }
                                     }, void 0, false, {
                                         fileName: "src/Timeline.jsx",
-                                        lineNumber: 271,
+                                        lineNumber: 296,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, laneIndex, true, {
                                 fileName: "src/Timeline.jsx",
-                                lineNumber: 216,
+                                lineNumber: 241,
                                 columnNumber: 13
                             }, this))
                     ]
                 }, void 0, true, {
                     fileName: "src/Timeline.jsx",
-                    lineNumber: 208,
+                    lineNumber: 233,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/Timeline.jsx",
-                lineNumber: 207,
+                lineNumber: 232,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27839,31 +27873,31 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                         children: "Timeline"
                     }, void 0, false, {
                         fileName: "src/Timeline.jsx",
-                        lineNumber: 278,
+                        lineNumber: 303,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
                         className: "tl-helper",
-                        children: "Duplo clique no nome para editar"
+                        children: "Zoom: Ctrl/Cmd + scroll"
                     }, void 0, false, {
                         fileName: "src/Timeline.jsx",
-                        lineNumber: 279,
+                        lineNumber: 304,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/Timeline.jsx",
-                lineNumber: 277,
+                lineNumber: 302,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/Timeline.jsx",
-        lineNumber: 184,
+        lineNumber: 208,
         columnNumber: 5
     }, this);
 }
-_s(Timeline, "B0hVJ81be5v2C/VCn+Vo5mcfcrM=");
+_s(Timeline, "1phkUnJLNqHB9kHJ2OPm+eON6jc=");
 _c = Timeline;
 var _c;
 $RefreshReg$(_c, "Timeline");

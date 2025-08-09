@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import assignLanes from "./assignLanes";
 
 const MS = 24 * 60 * 60 * 1000;
-const PX_PER_DAY = 70;
 const GUTTER = 180;
 
 function toLaneArrays(result) {
@@ -60,13 +59,14 @@ export default function Timeline({
 
   const totalDays = Math.floor((maxDate - minDate) / MS) + 1;
 
+  const [pxPerDay, setPxPerDay] = useState(70);
   const leftFor = (dateStr) => {
     const days = Math.floor((parseYmd(dateStr) - minDate) / MS);
-    return GUTTER + days * PX_PER_DAY;
+    return GUTTER + days * pxPerDay;
   };
   const widthFor = (startStr, endStr) => {
     const days = Math.floor((parseYmd(endStr) - parseYmd(startStr)) / MS) + 1;
-    return Math.max(1, days * PX_PER_DAY);
+    return Math.max(1, days * pxPerDay);
   };
 
   const scrollerRef = useRef(null);
@@ -79,6 +79,26 @@ export default function Timeline({
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
+
+  const onWheel = (e) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const rect = el.getBoundingClientRect();
+      const cursorX = el.scrollLeft + (e.clientX - rect.left);
+      const xFromScale = Math.max(0, cursorX - GUTTER);
+      const daysAtCursor = xFromScale / pxPerDay;
+      const factor = e.deltaY < 0 ? 1.1 : 0.9;
+      const next = Math.max(4, Math.min(400, pxPerDay * factor));
+      setPxPerDay(next);
+      const newCursorX = GUTTER + daysAtCursor * next;
+      const newScroll = newCursorX - (e.clientX - rect.left);
+      requestAnimationFrame(() => {
+        el.scrollLeft = Math.max(0, newScroll);
+      });
+    }
+  };
 
   const dragRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
@@ -133,7 +153,7 @@ export default function Timeline({
       if (st.el && st.el.setPointerCapture) st.el.setPointerCapture(e.pointerId);
       document.body.style.userSelect = "none";
     }
-    const deltaDays = Math.round(dx / PX_PER_DAY);
+    const deltaDays = Math.round(dx / pxPerDay);
     if (deltaDays === st.lastDeltaDays) return;
     st.lastDeltaDays = deltaDays;
 
@@ -180,21 +200,26 @@ export default function Timeline({
   };
   const cancelEdit = () => setEditingId(null);
 
+  const minLabelPx = 80;
+  const steps = [1, 2, 3, 5, 7, 10, 14, 21, 30];
+  const dayStep = steps.find((s) => s * pxPerDay >= minLabelPx) ?? steps[steps.length - 1];
+
   return (
     <div className="tl-root">
       <div className="tl-header">
         <div className="tl-ticksRow" aria-hidden>
-          <div className="tl-headerWrap" style={{ width: GUTTER + totalDays * PX_PER_DAY }}>
+          <div className="tl-headerWrap" style={{ width: GUTTER + totalDays * pxPerDay }}>
             <div className="tl-gutterDivider" />
             <div
               className="tl-ticksTrack"
-              style={{ width: totalDays * PX_PER_DAY, transform: `translateX(-${scrollLeft}px)` }}
+              style={{ width: totalDays * pxPerDay, transform: `translateX(-${scrollLeft}px)` }}
             >
-              {Array.from({ length: totalDays }, (_, i) => {
+              {Array.from({ length: Math.ceil(totalDays / dayStep) }, (_, k) => {
+                const i = k * dayStep;
                 const d = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate() + i);
                 const label = formatYMD(d);
                 return (
-                  <div key={i} className="tl-tick" style={{ left: i * PX_PER_DAY }}>
+                  <div key={i} className="tl-tick" style={{ left: i * pxPerDay }}>
                     <div className="tl-tickLabel">{label}</div>
                   </div>
                 );
@@ -204,12 +229,12 @@ export default function Timeline({
         </div>
       </div>
 
-      <div ref={scrollerRef} className="tl-scroller">
-        <div className="tl-canvas" style={{ width: GUTTER + totalDays * PX_PER_DAY }}>
+      <div ref={scrollerRef} className="tl-scroller" onWheel={onWheel}>
+        <div className="tl-canvas" style={{ width: GUTTER + totalDays * pxPerDay }}>
           <div className="tl-bodyMask" />
           <div
             className="tl-today"
-            style={{ left: GUTTER + Math.floor((Date.now() - minDate) / MS) * PX_PER_DAY }}
+            style={{ left: GUTTER + Math.floor((Date.now() - minDate) / MS) * pxPerDay }}
             aria-label="Today"
           />
           {lanes.map((lane, laneIndex) => (
@@ -276,7 +301,7 @@ export default function Timeline({
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0" }} aria-hidden>
         <strong>Timeline</strong>
-        <span className="tl-helper">Duplo clique no nome para editar</span>
+        <span className="tl-helper">Zoom: Ctrl/Cmd + scroll</span>
       </div>
     </div>
   );
