@@ -14,7 +14,7 @@
 122C:\Users\leckson\Downloads\timeline\timeline\node_modules\posthtml\node_modules\entities\lib\generated\decode-data-html.js133992115306919919 0
 78C:\Users\leckson\Downloads\timeline\timeline\node_modules\weak-lru-cache\tests133992115254766200 1
 88C:\Users\leckson\Downloads\timeline\timeline\node_modules\posthtml\node_modules\entities133992115307987860 1
-49C:\Users\leckson\Downloads\timeline\timeline\dist133992165783472359 1
+49C:\Users\leckson\Downloads\timeline\timeline\dist133992193219170079 1
 89C:\Users\leckson\Downloads\timeline\timeline\node_modules\@parcel\error-overlay\.eslintrc133992115300524484 0
 84C:\Users\leckson\Downloads\timeline\timeline\node_modules\js-yaml\lib\schema\json.js133992115255436596 0
 112C:\Users\leckson\Downloads\timeline\timeline\node_modules\lmdb\node_modules\node-addon-api\napi-inl.deprecated.h133992115254746195 0
@@ -24,7 +24,7 @@
 99C:\Users\leckson\Downloads\timeline\timeline\node_modules\@parcel\transformer-posthtml\package.json133992115271317472 0
 101C:\Users\leckson\Downloads\timeline\timeline\node_modules\caniuse-lite\data\features\web-animation.js133992115264391330 0
 121C:\Users\leckson\Downloads\timeline\timeline\node_modules\@parcel\source-map\parcel_sourcemap_wasm\dist-node\package.json133992115276953746 0
-56C:\Users\leckson\Downloads\timeline\timeline\src\app.css133992156638436699 0
+56C:\Users\leckson\Downloads\timeline\timeline\src\app.css133992192653831742 0
 80C:\Users\leckson\Downloads\timeline\timeline\node_modules\semver\functions\eq.js133992115257192979 0
 98C:\Users\leckson\Downloads\timeline\timeline\node_modules\dom-serializer\lib\esm\foreignNames.d.ts133992115255126193 0
 84C:\Users\leckson\Downloads\timeline\timeline\node_modules\entities\lib\esm\generated133992115256722989 1
@@ -55,7 +55,7 @@
 48C:\Users\leckson\Downloads\timeline\timeline\src133992117870040738 1
 66C:\Users\leckson\Downloads\timeline\timeline\node_modules\escalade133992115254996200 1
 87C:\Users\leckson\Downloads\timeline\timeline\node_modules\@swc\helpers\src\_dispose.mjs133992115263267743 0
-60C:\Users\leckson\Downloads\timeline\timeline\src\Timeline.js133992165782568840 0
+60C:\Users\leckson\Downloads\timeline\timeline\src\Timeline.js133992193218152875 0
 97C:\Users\leckson\Downloads\timeline\timeline\node_modules\@swc\helpers\src\_apply_decs_2203_r.mjs133992115262967496 0
 108C:\Users\leckson\Downloads\timeline\timeline\node_modules\lmdb\dependencies\lmdb\libraries\liblmdb\intro.doc133992115257610890 0
 92C:\Users\leckson\Downloads\timeline\timeline\node_modules\@parcel\utils\src\openInBrowser.js133992115266446858 0
@@ -3353,7 +3353,7 @@
 99C:\Users\leckson\Downloads\timeline\timeline\node_modules\@swc\helpers\_\_object_without_properties133992115262645221 1
 105C:\Users\leckson\Downloads\timeline\timeline\node_modules\@swc\helpers\_\_object_without_properties_loose133992115262630170 1
 97C:\Users\leckson\Downloads\timeline\timeline\node_modules\@parcel\reporter-cli\src\CLIReporter.js133992115296241764 0
-70C:\Users\leckson\Downloads\timeline\timeline\dist\timeline.31b563d9.js133992165783384959 0
+70C:\Users\leckson\Downloads\timeline\timeline\dist\timeline.31b563d9.js133992193219110028 0
 101C:\Users\leckson\Downloads\timeline\timeline\node_modules\@swc\helpers\_\_possible_constructor_return133992115262655295 1
 89C:\Users\leckson\Downloads\timeline\timeline\node_modules\@swc\helpers\_\_read_only_error133992115262663460 1
 113C:\Users\leckson\Downloads\timeline\timeline\node_modules\@swc\helpers\_\_apply_decorated_descriptor\package.json133992115261884174 0
@@ -4340,7 +4340,7 @@
 73C:\Users\leckson\Downloads\timeline\timeline\node_modules\.bin\parcel.cmd133992115377378421 0
 85C:\Users\leckson\Downloads\timeline\timeline\node_modules\.bin\update-browserslist-db133992115377433980 0
 89C:\Users\leckson\Downloads\timeline\timeline\node_modules\.bin\update-browserslist-db.cmd133992115377408384 0
-60C:\Users\leckson\Downloads\timeline\timeline\dist\index.html133992141412143371 0
-74C:\Users\leckson\Downloads\timeline\timeline\dist\timeline.31b563d9.js.map133992165783457217 0
-71C:\Users\leckson\Downloads\timeline\timeline\dist\timeline.4a5519d3.css133992156638781644 0
-75C:\Users\leckson\Downloads\timeline\timeline\dist\timeline.4a5519d3.css.map133992156638826631 0
+60C:\Users\leckson\Downloads\timeline\timeline\dist\index.html133992192231914252 0
+74C:\Users\leckson\Downloads\timeline\timeline\dist\timeline.31b563d9.js.map133992193219160074 0
+71C:\Users\leckson\Downloads\timeline\timeline\dist\timeline.4a5519d3.css133992192231558814 0
+75C:\Users\leckson\Downloads\timeline\timeline\dist\timeline.4a5519d3.css.map133992192231598312 0

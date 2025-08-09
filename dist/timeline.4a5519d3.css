@@ -143,17 +143,13 @@
 
 .tl-tickLabel {
   color: var(--tl-text-muted);
-  text-align: center;
+  white-space: nowrap;
+  text-align: left;
   font-size: 12px;
-  line-height: 1.1;
+  line-height: 1;
   position: absolute;
-  top: 6px;
+  top: 10px;
   left: 4px;
-}
-
-.tl-tickMon {
-  color: var(--tl-text-muted);
-  font-size: 10px;
 }
 
 .tl-bodyMask {

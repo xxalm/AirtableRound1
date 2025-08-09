@@ -27323,7 +27323,7 @@ var _timelineItems = require("./timelineItems");
 var _timelineItemsDefault = parcelHelpers.interopDefault(_timelineItems);
 var _s = $RefreshSig$();
 const MS = 86400000;
-const PX_PER_DAY = 35;
+const PX_PER_DAY = 70;
 const GUTTER = 180;
 function toLaneArrays(result) {
     if (!Array.isArray(result) || result.length === 0) return [];
@@ -27339,6 +27339,12 @@ function toLaneArrays(result) {
 function parseYmd(s) {
     const [y, m, d] = s.split("-").map(Number);
     return new Date(y, m - 1, d);
+}
+function formatYMD(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${dd}`;
 }
 function Timeline() {
     _s();
@@ -27401,7 +27407,7 @@ function Timeline() {
                                 className: "tl-gutterDivider"
                             }, void 0, false, {
                                 fileName: "src/Timeline.js",
-                                lineNumber: 74,
+                                lineNumber: 79,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27413,12 +27419,8 @@ function Timeline() {
                                 children: Array.from({
                                     length: totalDays
                                 }, (_, i)=>{
-                                    const d = new Date(minDate);
-                                    d.setDate(d.getDate() + i);
-                                    const day = d.getDate();
-                                    const mon = d.toLocaleString("en-US", {
-                                        month: "short"
-                                    });
+                                    const d = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate() + i);
+                                    const label = formatYMD(d);
                                     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                         className: "tl-tick",
                                         style: {
@@ -27426,53 +27428,37 @@ function Timeline() {
                                         },
                                         children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                             className: "tl-tickLabel",
-                                            children: [
-                                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                                    children: day
-                                                }, void 0, false, {
-                                                    fileName: "src/Timeline.js",
-                                                    lineNumber: 90,
-                                                    columnNumber: 23
-                                                }, this),
-                                                /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                                                    className: "tl-tickMon",
-                                                    children: mon
-                                                }, void 0, false, {
-                                                    fileName: "src/Timeline.js",
-                                                    lineNumber: 91,
-                                                    columnNumber: 23
-                                                }, this)
-                                            ]
-                                        }, void 0, true, {
+                                            children: label
+                                        }, void 0, false, {
                                             fileName: "src/Timeline.js",
-                                            lineNumber: 89,
+                                            lineNumber: 92,
                                             columnNumber: 21
                                         }, this)
                                     }, i, false, {
                                         fileName: "src/Timeline.js",
-                                        lineNumber: 88,
+                                        lineNumber: 91,
                                         columnNumber: 19
                                     }, this);
                                 })
                             }, void 0, false, {
                                 fileName: "src/Timeline.js",
-                                lineNumber: 75,
+                                lineNumber: 80,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/Timeline.js",
-                        lineNumber: 73,
+                        lineNumber: 78,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "src/Timeline.js",
-                    lineNumber: 72,
+                    lineNumber: 77,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/Timeline.js",
-                lineNumber: 71,
+                lineNumber: 76,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27488,7 +27474,7 @@ function Timeline() {
                             className: "tl-bodyMask"
                         }, void 0, false, {
                             fileName: "src/Timeline.js",
-                            lineNumber: 105,
+                            lineNumber: 103,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27499,7 +27485,7 @@ function Timeline() {
                             "aria-label": "Today"
                         }, void 0, false, {
                             fileName: "src/Timeline.js",
-                            lineNumber: 108,
+                            lineNumber: 105,
                             columnNumber: 11
                         }, this),
                         lanes.map((lane, laneIndex)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27517,7 +27503,7 @@ function Timeline() {
                                         ]
                                     }, void 0, true, {
                                         fileName: "src/Timeline.js",
-                                        lineNumber: 117,
+                                        lineNumber: 113,
                                         columnNumber: 15
                                     }, this),
                                     lane.map((item)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27534,12 +27520,12 @@ function Timeline() {
                                                 children: item.name
                                             }, void 0, false, {
                                                 fileName: "src/Timeline.js",
-                                                lineNumber: 131,
+                                                lineNumber: 127,
                                                 columnNumber: 19
                                             }, this)
                                         }, item.id, false, {
                                             fileName: "src/Timeline.js",
-                                            lineNumber: 120,
+                                            lineNumber: 116,
                                             columnNumber: 17
                                         }, this)),
                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27549,24 +27535,24 @@ function Timeline() {
                                         }
                                     }, void 0, false, {
                                         fileName: "src/Timeline.js",
-                                        lineNumber: 135,
+                                        lineNumber: 131,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, laneIndex, true, {
                                 fileName: "src/Timeline.js",
-                                lineNumber: 116,
+                                lineNumber: 112,
                                 columnNumber: 13
                             }, this))
                     ]
                 }, void 0, true, {
                     fileName: "src/Timeline.js",
-                    lineNumber: 103,
+                    lineNumber: 102,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/Timeline.js",
-                lineNumber: 102,
+                lineNumber: 101,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27582,27 +27568,27 @@ function Timeline() {
                         children: "Timeline"
                     }, void 0, false, {
                         fileName: "src/Timeline.js",
-                        lineNumber: 142,
+                        lineNumber: 138,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
                         className: "tl-helper",
-                        children: "Gutter fixo, ticks em duas linhas, layout compacto"
+                        children: "Gutter fixo, ticks YYYY-MM-DD, layout compacto"
                     }, void 0, false, {
                         fileName: "src/Timeline.js",
-                        lineNumber: 143,
+                        lineNumber: 139,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/Timeline.js",
-                lineNumber: 141,
+                lineNumber: 137,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/Timeline.js",
-        lineNumber: 69,
+        lineNumber: 75,
         columnNumber: 5
     }, this);
 }

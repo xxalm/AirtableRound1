@@ -3,7 +3,7 @@ import assignLanes from "./assignLanes";
 import timelineItems from "./timelineItems";
 
 const MS = 24 * 60 * 60 * 1000;
-const PX_PER_DAY = 35;
+const PX_PER_DAY = 70;
 const GUTTER = 180;
 
 function toLaneArrays(result) {
@@ -25,7 +25,14 @@ function parseYmd(s) {
   return new Date(y, m - 1, d);
 }
 
-export default function Timeline() {  
+function formatYMD(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+}
+
+export default function Timeline() {
   const lanes = useMemo(() => {
     try {
       const res = assignLanes(timelineItems);
@@ -35,7 +42,6 @@ export default function Timeline() {
     }
   }, []);
 
-  
   const [minDate, maxDate] = useMemo(() => {
     const all = timelineItems.flatMap(({ start, end }) => [parseYmd(start), parseYmd(end)]);
     const min = new Date(Math.min(...all.map((d) => +d)));
@@ -44,7 +50,7 @@ export default function Timeline() {
   }, []);
 
   const totalDays = Math.floor((maxDate - minDate) / MS) + 1;
-  
+
   const leftFor = (dateStr) => {
     const days = Math.floor((parseYmd(dateStr) - minDate) / MS);
     return GUTTER + days * PX_PER_DAY;
@@ -53,7 +59,7 @@ export default function Timeline() {
     const days = Math.floor((parseYmd(endStr) - parseYmd(startStr)) / MS) + 1;
     return Math.max(1, days * PX_PER_DAY);
   };
-  
+
   const scrollerRef = useRef(null);
   const [scrollLeft, setScrollLeft] = useState(0);
   useEffect(() => {
@@ -67,7 +73,6 @@ export default function Timeline() {
 
   return (
     <div className="tl-root">
-      {/* Header sincronizado */}
       <div className="tl-header">
         <div className="tl-ticksRow" aria-hidden>
           <div className="tl-headerWrap" style={{ width: GUTTER + totalDays * PX_PER_DAY }}>
@@ -80,16 +85,11 @@ export default function Timeline() {
               }}
             >
               {Array.from({ length: totalDays }, (_, i) => {
-                const d = new Date(minDate);
-                d.setDate(d.getDate() + i);
-                const day = d.getDate();
-                const mon = d.toLocaleString("en-US", { month: "short" });
+                const d = new Date(minDate.getFullYear(), minDate.getMonth(), minDate.getDate() + i);
+                const label = formatYMD(d);
                 return (
                   <div key={i} className="tl-tick" style={{ left: i * PX_PER_DAY }}>
-                    <div className="tl-tickLabel">
-                      <div>{day}</div>
-                      <div className="tl-tickMon">{mon}</div>
-                    </div>
+                    <div className="tl-tickLabel">{label}</div>
                   </div>
                 );
               })}
@@ -98,20 +98,16 @@ export default function Timeline() {
         </div>
       </div>
 
-      {/* Corpo scrollável */}
       <div ref={scrollerRef} className="tl-scroller">
         <div className="tl-canvas" style={{ width: GUTTER + totalDays * PX_PER_DAY }}>
-          {/* máscara do gutter (evita bleed de barras para a coluna da esquerda) */}
           <div className="tl-bodyMask" />
 
-          {/* marcador "Hoje" */}
           <div
             className="tl-today"
             style={{ left: GUTTER + Math.floor((Date.now() - minDate) / MS) * PX_PER_DAY }}
             aria-label="Today"
           />
 
-          {/* Lanes */}
           {lanes.map((lane, laneIndex) => (
             <div key={laneIndex} className="tl-lane" style={{ height: 50 }} role="list">
               <div className="tl-laneHeader">Lane {laneIndex + 1}</div>
@@ -140,7 +136,7 @@ export default function Timeline() {
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0" }} aria-hidden>
         <strong>Timeline</strong>
-        <span className="tl-helper">Gutter fixo, ticks em duas linhas, layout compacto</span>
+        <span className="tl-helper">Gutter fixo, ticks YYYY-MM-DD, layout compacto</span>
       </div>
     </div>
   );
