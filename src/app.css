@@ -156,10 +156,8 @@
   z-index: 4;
 }
 
-.tl-moveGrip {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  cursor: grab;
-}
+.tl-item { user-select: none; }
+.tl-label { user-select: none; }
+.tl-handle { pointer-events: auto; touch-action: none; }
+.tl-moveGrip { flex: 1; display: flex; align-items: center; cursor: grab; }
 .tl-moveGrip:active { cursor: grabbing; }

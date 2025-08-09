@@ -164,6 +164,16 @@
   left: 0;
 }
 
+.tl-item, .tl-label {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.tl-handle {
+  pointer-events: auto;
+  touch-action: none;
+}
+
 .tl-moveGrip {
   cursor: grab;
   flex: 1;

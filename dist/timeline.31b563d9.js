@@ -27503,27 +27503,59 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
         return ()=>el.removeEventListener("scroll", onScroll);
     }, []);
     const dragRef = (0, _react.useRef)(null);
-    const startDrag = (e, item, kind)=>{
+    const [editingId, setEditingId] = (0, _react.useState)(null);
+    const [draftName, setDraftName] = (0, _react.useState)("");
+    const beginImmediate = (e, item, kind)=>{
         e.preventDefault();
         e.stopPropagation();
+        const el = e.currentTarget;
         dragRef.current = {
             kind,
             id: item.id,
+            pointerId: e.pointerId,
             startX: e.clientX,
             origStart: parseYmd(item.start),
             origEnd: parseYmd(item.end),
-            lastDeltaDays: null
+            lastDeltaDays: null,
+            pending: false,
+            el
         };
+        if (el.setPointerCapture) el.setPointerCapture(e.pointerId);
         document.body.style.userSelect = "none";
-        window.addEventListener("mousemove", onDrag);
-        window.addEventListener("mouseup", endDrag, {
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", end, {
             once: true
         });
     };
-    const onDrag = (e)=>{
+    const beginMovePending = (e, item)=>{
+        if (editingId) return;
+        const el = e.currentTarget;
+        dragRef.current = {
+            kind: "move",
+            id: item.id,
+            pointerId: e.pointerId,
+            startX: e.clientX,
+            origStart: parseYmd(item.start),
+            origEnd: parseYmd(item.end),
+            lastDeltaDays: null,
+            pending: true,
+            el
+        };
+        window.addEventListener("pointermove", move);
+        window.addEventListener("pointerup", end, {
+            once: true
+        });
+    };
+    const move = (e)=>{
         const st = dragRef.current;
-        if (!st) return;
+        if (!st || e.pointerId !== st.pointerId) return;
         const dx = e.clientX - st.startX;
+        if (st.pending) {
+            if (Math.abs(dx) < 4) return;
+            st.pending = false;
+            if (st.el && st.el.setPointerCapture) st.el.setPointerCapture(e.pointerId);
+            document.body.style.userSelect = "none";
+        }
         const deltaDays = Math.round(dx / PX_PER_DAY);
         if (deltaDays === st.lastDeltaDays) return;
         st.lastDeltaDays = deltaDays;
@@ -27556,11 +27588,27 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
         if (!current) return;
         onChangeItem?.(update(current));
     };
-    const endDrag = ()=>{
-        dragRef.current = null;
-        document.body.style.userSelect = "";
-        window.removeEventListener("mousemove", onDrag);
+    const end = (e)=>{
+        const st = dragRef.current;
+        if (st && e.pointerId === st.pointerId) {
+            dragRef.current = null;
+            document.body.style.userSelect = "";
+            window.removeEventListener("pointermove", move);
+        }
     };
+    const startEdit = (item, e)=>{
+        e.stopPropagation();
+        setEditingId(item.id);
+        setDraftName(item.name);
+    };
+    const commitEdit = (item)=>{
+        if (draftName.trim() && draftName !== item.name) onChangeItem?.({
+            ...item,
+            name: draftName.trim()
+        });
+        setEditingId(null);
+    };
+    const cancelEdit = ()=>setEditingId(null);
     return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
         className: "tl-root",
         children: [
@@ -27579,7 +27627,7 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                 className: "tl-gutterDivider"
                             }, void 0, false, {
                                 fileName: "src/Timeline.jsx",
-                                lineNumber: 141,
+                                lineNumber: 188,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27603,34 +27651,34 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                             children: label
                                         }, void 0, false, {
                                             fileName: "src/Timeline.jsx",
-                                            lineNumber: 151,
+                                            lineNumber: 198,
                                             columnNumber: 21
                                         }, this)
                                     }, i, false, {
                                         fileName: "src/Timeline.jsx",
-                                        lineNumber: 150,
+                                        lineNumber: 197,
                                         columnNumber: 19
                                     }, this);
                                 })
                             }, void 0, false, {
                                 fileName: "src/Timeline.jsx",
-                                lineNumber: 142,
+                                lineNumber: 189,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/Timeline.jsx",
-                        lineNumber: 140,
+                        lineNumber: 187,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "src/Timeline.jsx",
-                    lineNumber: 139,
+                    lineNumber: 186,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/Timeline.jsx",
-                lineNumber: 138,
+                lineNumber: 185,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27646,7 +27694,7 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                             className: "tl-bodyMask"
                         }, void 0, false, {
                             fileName: "src/Timeline.jsx",
-                            lineNumber: 162,
+                            lineNumber: 209,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27657,7 +27705,7 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                             "aria-label": "Today"
                         }, void 0, false, {
                             fileName: "src/Timeline.jsx",
-                            lineNumber: 163,
+                            lineNumber: 210,
                             columnNumber: 11
                         }, this),
                         lanes.map((lane, laneIndex)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27675,18 +27723,13 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                         ]
                                     }, void 0, true, {
                                         fileName: "src/Timeline.jsx",
-                                        lineNumber: 170,
+                                        lineNumber: 217,
                                         columnNumber: 15
                                     }, this),
                                     lane.map((item)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                             className: "tl-item",
                                             role: "listitem",
                                             title: `${item.name}\n${item.start} \u{2013} ${item.end}`,
-                                            onMouseDown: (e)=>{
-                                                const roleEl = e.target.closest("[data-role]");
-                                                const role = roleEl ? roleEl.getAttribute("data-role") : "move";
-                                                startDrag(e, item, role);
-                                            },
                                             style: {
                                                 left: leftFor(item.start),
                                                 width: widthFor(item.start, item.end),
@@ -27695,40 +27738,65 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                             children: [
                                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                                     className: "tl-handle tl-handle-start",
-                                                    "data-role": "start"
+                                                    "data-role": "start",
+                                                    onPointerDown: (e)=>beginImmediate(e, item, "start")
                                                 }, void 0, false, {
                                                     fileName: "src/Timeline.jsx",
-                                                    lineNumber: 189,
+                                                    lineNumber: 230,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                                     className: "tl-moveGrip",
                                                     "data-role": "move",
-                                                    children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
+                                                    onDoubleClick: (e)=>startEdit(item, e),
+                                                    onPointerDown: (e)=>beginMovePending(e, item),
+                                                    children: editingId === item.id ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("input", {
+                                                        autoFocus: true,
+                                                        value: draftName,
+                                                        onChange: (e)=>setDraftName(e.target.value),
+                                                        onBlur: ()=>commitEdit(item),
+                                                        onKeyDown: (e)=>{
+                                                            if (e.key === "Enter") commitEdit(item);
+                                                            if (e.key === "Escape") cancelEdit();
+                                                        },
+                                                        style: {
+                                                            width: "100%",
+                                                            border: "none",
+                                                            outline: "none",
+                                                            background: "transparent",
+                                                            font: "inherit",
+                                                            padding: 0
+                                                        }
+                                                    }, void 0, false, {
+                                                        fileName: "src/Timeline.jsx",
+                                                        lineNumber: 242,
+                                                        columnNumber: 23
+                                                    }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
                                                         className: "tl-label",
                                                         children: item.name
                                                     }, void 0, false, {
                                                         fileName: "src/Timeline.jsx",
-                                                        lineNumber: 191,
-                                                        columnNumber: 21
+                                                        lineNumber: 261,
+                                                        columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "src/Timeline.jsx",
-                                                    lineNumber: 190,
+                                                    lineNumber: 235,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
                                                     className: "tl-handle tl-handle-end",
-                                                    "data-role": "end"
+                                                    "data-role": "end",
+                                                    onPointerDown: (e)=>beginImmediate(e, item, "end")
                                                 }, void 0, false, {
                                                     fileName: "src/Timeline.jsx",
-                                                    lineNumber: 193,
+                                                    lineNumber: 264,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, item.id, true, {
                                             fileName: "src/Timeline.jsx",
-                                            lineNumber: 173,
+                                            lineNumber: 219,
                                             columnNumber: 17
                                         }, this)),
                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27738,24 +27806,24 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                                         }
                                     }, void 0, false, {
                                         fileName: "src/Timeline.jsx",
-                                        lineNumber: 197,
+                                        lineNumber: 271,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, laneIndex, true, {
                                 fileName: "src/Timeline.jsx",
-                                lineNumber: 169,
+                                lineNumber: 216,
                                 columnNumber: 13
                             }, this))
                     ]
                 }, void 0, true, {
                     fileName: "src/Timeline.jsx",
-                    lineNumber: 161,
+                    lineNumber: 208,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/Timeline.jsx",
-                lineNumber: 160,
+                lineNumber: 207,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -27771,31 +27839,31 @@ function Timeline({ items, viewportStart, viewportEnd, onChangeItem }) {
                         children: "Timeline"
                     }, void 0, false, {
                         fileName: "src/Timeline.jsx",
-                        lineNumber: 204,
+                        lineNumber: 278,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
                         className: "tl-helper",
-                        children: "Drag nas bordas altera in\xedcio/fim \u2022 Drag no centro move"
+                        children: "Duplo clique no nome para editar"
                     }, void 0, false, {
                         fileName: "src/Timeline.jsx",
-                        lineNumber: 205,
+                        lineNumber: 279,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/Timeline.jsx",
-                lineNumber: 203,
+                lineNumber: 277,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/Timeline.jsx",
-        lineNumber: 137,
+        lineNumber: 184,
         columnNumber: 5
     }, this);
 }
-_s(Timeline, "41ovCqwP/Coy26QNSAyfY/Xhe5M=");
+_s(Timeline, "B0hVJ81be5v2C/VCn+Vo5mcfcrM=");
 _c = Timeline;
 var _c;
 $RefreshReg$(_c, "Timeline");

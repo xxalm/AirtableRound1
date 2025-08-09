@@ -81,27 +81,58 @@ export default function Timeline({
   }, []);
 
   const dragRef = useRef(null);
+  const [editingId, setEditingId] = useState(null);
+  const [draftName, setDraftName] = useState("");
 
-  const startDrag = (e, item, kind) => {
+  const beginImmediate = (e, item, kind) => {
     e.preventDefault();
     e.stopPropagation();
+    const el = e.currentTarget;
     dragRef.current = {
       kind,
       id: item.id,
+      pointerId: e.pointerId,
       startX: e.clientX,
       origStart: parseYmd(item.start),
       origEnd: parseYmd(item.end),
       lastDeltaDays: null,
+      pending: false,
+      el
     };
+    if (el.setPointerCapture) el.setPointerCapture(e.pointerId);
     document.body.style.userSelect = "none";
-    window.addEventListener("mousemove", onDrag);
-    window.addEventListener("mouseup", endDrag, { once: true });
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", end, { once: true });
   };
 
-  const onDrag = (e) => {
+  const beginMovePending = (e, item) => {
+    if (editingId) return;
+    const el = e.currentTarget;
+    dragRef.current = {
+      kind: "move",
+      id: item.id,
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      origStart: parseYmd(item.start),
+      origEnd: parseYmd(item.end),
+      lastDeltaDays: null,
+      pending: true,
+      el
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", end, { once: true });
+  };
+
+  const move = (e) => {
     const st = dragRef.current;
-    if (!st) return;
+    if (!st || e.pointerId !== st.pointerId) return;
     const dx = e.clientX - st.startX;
+    if (st.pending) {
+      if (Math.abs(dx) < 4) return;
+      st.pending = false;
+      if (st.el && st.el.setPointerCapture) st.el.setPointerCapture(e.pointerId);
+      document.body.style.userSelect = "none";
+    }
     const deltaDays = Math.round(dx / PX_PER_DAY);
     if (deltaDays === st.lastDeltaDays) return;
     st.lastDeltaDays = deltaDays;
@@ -127,11 +158,27 @@ export default function Timeline({
     onChangeItem?.(update(current));
   };
 
-  const endDrag = () => {
-    dragRef.current = null;
-    document.body.style.userSelect = "";
-    window.removeEventListener("mousemove", onDrag);
+  const end = (e) => {
+    const st = dragRef.current;
+    if (st && e.pointerId === st.pointerId) {
+      dragRef.current = null;
+      document.body.style.userSelect = "";
+      window.removeEventListener("pointermove", move);
+    }
   };
+
+  const startEdit = (item, e) => {
+    e.stopPropagation();
+    setEditingId(item.id);
+    setDraftName(item.name);
+  };
+  const commitEdit = (item) => {
+    if (draftName.trim() && draftName !== item.name) {
+      onChangeItem?.({ ...item, name: draftName.trim() });
+    }
+    setEditingId(null);
+  };
+  const cancelEdit = () => setEditingId(null);
 
   return (
     <div className="tl-root">
@@ -168,32 +215,59 @@ export default function Timeline({
           {lanes.map((lane, laneIndex) => (
             <div key={laneIndex} className="tl-lane" style={{ height: 50 }} role="list">
               <div className="tl-laneHeader">Lane {laneIndex + 1}</div>
-
               {lane.map((item) => (
                 <div
                   key={item.id}
                   className="tl-item"
                   role="listitem"
                   title={`${item.name}\n${item.start} – ${item.end}`}
-                  onMouseDown={(e) => {
-                    const roleEl = e.target.closest("[data-role]");
-                    const role = roleEl ? roleEl.getAttribute("data-role") : "move";
-                    startDrag(e, item, role);
-                  }}
                   style={{
                     left: leftFor(item.start),
                     width: widthFor(item.start, item.end),
                     top: 8
                   }}
                 >
-                  <div className="tl-handle tl-handle-start" data-role="start" />
-                  <div className="tl-moveGrip" data-role="move">
-                    <span className="tl-label">{item.name}</span>
+                  <div
+                    className="tl-handle tl-handle-start"
+                    data-role="start"
+                    onPointerDown={(e) => beginImmediate(e, item, "start")}
+                  />
+                  <div
+                    className="tl-moveGrip"
+                    data-role="move"
+                    onDoubleClick={(e) => startEdit(item, e)}
+                    onPointerDown={(e) => beginMovePending(e, item)}
+                  >
+                    {editingId === item.id ? (
+                      <input
+                        autoFocus
+                        value={draftName}
+                        onChange={(e) => setDraftName(e.target.value)}
+                        onBlur={() => commitEdit(item)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") commitEdit(item);
+                          if (e.key === "Escape") cancelEdit();
+                        }}
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          outline: "none",
+                          background: "transparent",
+                          font: "inherit",
+                          padding: 0
+                        }}
+                      />
+                    ) : (
+                      <span className="tl-label">{item.name}</span>
+                    )}
                   </div>
-                  <div className="tl-handle tl-handle-end" data-role="end" />
+                  <div
+                    className="tl-handle tl-handle-end"
+                    data-role="end"
+                    onPointerDown={(e) => beginImmediate(e, item, "end")}
+                  />
                 </div>
               ))}
-
               <div className="tl-rowGuide" style={{ top: 24 }} />
             </div>
           ))}
@@ -202,7 +276,7 @@ export default function Timeline({
 
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0" }} aria-hidden>
         <strong>Timeline</strong>
-        <span className="tl-helper">Drag nas bordas altera início/fim • Drag no centro move</span>
+        <span className="tl-helper">Duplo clique no nome para editar</span>
       </div>
     </div>
   );
